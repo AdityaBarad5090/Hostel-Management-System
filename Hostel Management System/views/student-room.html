@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>My Room</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { background: #f1f5f9; }
+        .sidebar {
+            min-height: 100vh;
+            background: #1e293b;
+            color: white;
+            padding: 20px;
+        }
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #cbd5e1;
+            padding: 10px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-bottom: 10px;
+            transition: 0.2s;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            background: #0d6efd;
+            color: white;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            padding: 20px;
+        }
+        .roommate-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        }
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #0d6efd;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container-fluid">
+    <div class="row">
+
+        <!-- Sidebar -->
+        <div class="col-md-2 sidebar">
+            <h4 class="mb-4">👤 Student</h4>
+            <a href="/student/dashboard"> <i class="bi bi-speedometer2"></i> Dashboard</a>
+            <a href="/student/profile"> <i class="bi bi-person"></i> Profile</a>
+            <a href="/student/room" class="active"> <i class="bi bi-door-open"></i> Room</a>
+            <a href="/student/fees"> <i class="bi bi-cash"></i> Fees</a>
+            <hr>
+            <button class="btn btn-danger w-100 mt-3" onclick="logout()">Logout</button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10 p-4">
+            <h3 class="mb-4">🚪 My Room</h3>
+
+            <!-- Room Details Card -->
+            <div class="card bg-primary text-white shadow mb-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5 class="mb-3">Room Details</h5>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <small>Room Number</small>
+                                <h4 id="roomNumber">Loading...</h4>
+                            </div>
+                            <div class="col-6">
+                                <small>Capacity</small>
+                                <h4 id="roomCapacity">Loading...</h4>
+                            </div>
+                            <div class="col-6">
+                                <small>Monthly Fee</small>
+                                <h4 id="roomFee">Loading...</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <i class="bi bi-door-open" style="font-size: 80px; opacity: 0.4;"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Roommates Section -->
+            <h5 class="mb-3">👥 Roommates</h5>
+            <div class="row g-3" id="roommatesList">
+                <div class="col-12 text-muted">Loading...</div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    const student = JSON.parse(localStorage.getItem("student"));
+
+    if (!student) {
+        window.location.href = "/student/login";
+    }
+
+    // Fetch Room Details + Roommates
+    fetch(`/rooms/student-room/${student.id}`)
+        .then(res => res.json())
+        .then(data => {
+
+            // Room Details
+            document.getElementById("roomNumber").innerText = data.room.room_number || "N/A";
+            document.getElementById("roomCapacity").innerText = data.room.capacity || "N/A";
+            document.getElementById("roomFee").innerText = "₹" + data.room.fee || "N/A";
+
+            // Roommates
+            const list = document.getElementById("roommatesList");
+            list.innerHTML = "";
+
+            if (data.roommates.length === 0) {
+                list.innerHTML = `<div class="col-12 text-muted">No roommates found.</div>`;
+                return;
+            }
+
+            data.roommates.forEach(r => {
+                const initials = r.name.split(" ").map(n => n[0]).join("").toUpperCase();
+                list.innerHTML += `
+                    <div class="col-md-4">
+                        <div class="roommate-card">
+                            <div class="avatar">${initials}</div>
+                            <div>
+                                <p class="mb-0 fw-bold">${r.name}</p>
+                                <small class="text-muted">${r.phone}</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        })
+        .catch(() => {
+            document.getElementById("roomNumber").innerText = "Error";
+        });
+
+    function logout() {
+        localStorage.removeItem("student");
+        window.location.href = "/";
+    }
+</script>
+
+</body>
+</html>
