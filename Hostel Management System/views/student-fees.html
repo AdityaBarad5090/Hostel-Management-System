@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>My Fees</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            background: #f1f5f9;
+        }
+
+        .sidebar {
+            min-height: 100vh;
+            background: #1e293b;
+            color: white;
+            padding: 20px;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #cbd5e1;
+            padding: 10px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-bottom: 10px;
+            transition: 0.2s;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background: #0d6efd;
+            color: white;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            padding: 25px;
+            background: white;
+        }
+
+        .status-badge {
+            font-size: 16px;
+            padding: 8px 20px;
+            border-radius: 50px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar">
+                <h4 class="mb-4">👤 Student</h4>
+                <a href="/student/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                <a href="/student/profile"><i class="bi bi-person"></i> Profile</a>
+                <a href="/student/room"><i class="bi bi-door-open"></i> Room</a>
+                <a href="/student/fees" class="active"><i class="bi bi-cash"></i> Fees</a>
+                <hr>
+                <button class="btn btn-danger w-100 mt-3" onclick="logout()">Logout</button>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-10 p-4">
+                <h3 class="mb-4">💰 My Fees</h3>
+
+                <div class="row g-4">
+                    <div class="col-md-5">
+                        <div class="card shadow h-100">
+                            <h5 class="mb-4">📋 Fee Details</h5>
+
+                            <div class="mb-3">
+                                <small class="text-muted">Student Name</small>
+                                <h5 id="feeName">Loading...</h5>
+                            </div>
+
+                            <div class="mb-3">
+                                <small class="text-muted">Room Number</small>
+                                <h5 id="feeRoom">Loading...</h5>
+                            </div>
+
+                            <div class="mb-3">
+                                <small class="text-muted">Fee Amount</small>
+                                <h3 class="text-primary" id="feeAmount">Loading...</h3>
+                            </div>
+
+                            <div class="mb-4">
+                                <small class="text-muted d-block mb-2">Payment Status</small>
+                                <span class="status-badge badge" id="statusBadge">Loading...</span>
+                            </div>
+
+                            <button class="btn btn-success w-100" onclick="downloadReceipt()">
+                                <i class="bi bi-download"></i> Download Receipt
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const student = JSON.parse(localStorage.getItem("student"));
+
+        if (!student) {
+            window.location.href = "/student/login";
+        }
+
+        let feeData = null;
+
+        // Fetch Fee Details from API
+        fetch(`/fees/get-fee/${student.id}`)
+            .then(res => res.json())
+            .then(data => {
+                feeData = data;
+
+                // Fill UI dynamically from API response
+                document.getElementById("feeName").innerText = data.name || student.name || "N/A";
+                document.getElementById("feeRoom").innerText = data.room_no || student.room_id || "Not Assigned";
+                document.getElementById("feeAmount").innerText = data.fee ? `₹ ${data.fee}` : "N/A";
+
+                // Payment Status Badge
+                const badge = document.getElementById("statusBadge");
+                if (data.status === "Paid") {
+                    badge.innerText = "✅ Paid";
+                    badge.classList.add("bg-success");
+                } else {
+                    badge.innerText = "⏳ Unpaid";
+                    badge.classList.add("bg-warning", "text-dark");
+                }
+            })
+            .catch(() => {
+                document.getElementById("feeName").innerText = "Error loading data";
+            });
+
+        // Download Receipt — fully dynamic from feeData
+        function downloadReceipt() {
+            if (!feeData) {
+                alert("Fee data not loaded yet!");
+                return;
+            }
+            if (feeData.status !== "Paid") {
+                alert("❌ Receipt not available. Your fee is not paid yet!");
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const name = feeData.name || student.name || "N/A";
+            const room = feeData.room_no || student.room_id || "Not Assigned";
+            const amount = feeData.fee || "N/A";
+            const status = feeData.status || "Unpaid";
+            const date = new Date().toLocaleDateString("en-IN", {
+                day: "2-digit", month: "long", year: "numeric"
+            });
+
+            // Header
+            doc.setFillColor(30, 41, 59);
+            doc.rect(0, 0, 210, 35, "F");
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(20);
+            doc.setFont("helvetica", "bold");
+            doc.text("HOSTEL FEE RECEIPT", 105, 20, { align: "center" });
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.text("Official Payment Document", 105, 29, { align: "center" });
+
+            // Reset color
+            doc.setTextColor(0, 0, 0);
+
+            // Receipt Info
+            doc.setFontSize(10);
+            doc.text(`Receipt Date : ${date}`, 130, 50);
+            doc.text(`Receipt No   : RCP-${student.id}-${Date.now().toString().slice(-5)}`, 130, 58);
+
+            // Divider
+            doc.setDrawColor(200, 200, 200);
+            doc.line(10, 65, 200, 65);
+
+            // Student Details
+            doc.setFontSize(13);
+            doc.setFont("helvetica", "bold");
+            doc.text("Student Details", 10, 78);
+
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(11);
+
+            const details = [
+                ["Student Name", name],
+                ["Room Number", room],
+                ["Fee Amount", `Rs. ${amount}`],
+                ["Payment Status", status],
+            ];
+
+            let y = 90;
+            details.forEach(([label, value]) => {
+                doc.setFont("helvetica", "bold");
+                doc.text(`${label}`, 10, y);
+                doc.setFont("helvetica", "normal");
+                doc.text(`: ${value}`, 70, y);
+                y += 12;
+            });
+
+            // Status Box
+            if (status === "Paid") {
+                doc.setFillColor(34, 197, 94);
+            } else {
+                doc.setFillColor(239, 68, 68);
+            }
+            doc.setTextColor(255, 255, 255);
+            doc.roundedRect(10, y + 5, 60, 14, 3, 3, "F");
+            doc.setFontSize(11);
+            doc.setFont("helvetica", "bold");
+            doc.text(status === "Paid" ? "PAID" : "UNPAID", 40, y + 14, { align: "center" });
+
+            // Footer
+            doc.setTextColor(100, 100, 100);
+            doc.setFontSize(9);
+            doc.setFont("helvetica", "normal");
+            doc.line(10, 270, 200, 270);
+            doc.text("This is a computer-generated receipt. No signature required.", 105, 278, { align: "center" });
+            doc.text("Hostel Management System", 105, 284, { align: "center" });
+
+            doc.save(`Receipt_${name}_${date}.pdf`);
+        }
+        // Payment Status Badge
+        const badge = document.getElementById("statusBadge");
+        const downloadBtn = document.getElementById("downloadBtn");  // ✅ get button
+
+        if (data.status === "Paid") {
+            badge.innerText = "✅ Paid";
+            badge.classList.add("bg-success");
+            downloadBtn.disabled = false;  // ✅ enable button
+        } else {
+            badge.innerText = "⏳ Unpaid";
+            badge.classList.add("bg-warning", "text-dark");
+            downloadBtn.disabled = true;   // ✅ disable button
+            downloadBtn.innerText = "⛔ Pay Fee First";  // ✅ change text
+        }
+
+        function logout() {
+            localStorage.removeItem("student");
+            window.location.href = "/";
+        }
+    </script>
+
+</body>
+
+</html>

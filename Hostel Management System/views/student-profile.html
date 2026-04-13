@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>My Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f1f5f9;
+        }
+
+        .sidebar {
+            min-height: 100vh;
+            background: #1e293b;
+            color: white;
+            padding: 20px;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #cbd5e1;
+            padding: 10px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-bottom: 10px;
+            transition: 0.2s;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background: #0d6efd;
+            color: white;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            padding: 25px;
+            background: white;
+        }
+
+        .avatar-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #0d6efd;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            margin: 0 auto 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar">
+                <h4 class="mb-4">👤 Student</h4>
+                <a href="/student/dashboard"> <i class="bi bi-speedometer2"></i> Dashboard</a>
+                <a href="/student/profile" class="active"> <i class="bi bi-person"></i> Profile</a>
+                <a href="/student/room"> <i class="bi bi-door-open"></i> Room</a>
+                <a href="/student/fees"> <i class="bi bi-cash"></i> Fees</a>
+                <hr>
+                <button class="btn btn-danger w-100 mt-3" onclick="logout()">Logout</button>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-10 p-4">
+                <h3 class="mb-4">👤 My Profile</h3>
+
+                <div class="row g-4">
+
+                    <!-- Profile Details Card -->
+                    <div class="col-md-4">
+                        <div class="card shadow text-center">
+                            <div class="avatar-circle" id="avatarInitials">--</div>
+                            <h5 id="profileName">Loading...</h5>
+                            <p class="text-muted mb-1"><i class="bi bi-envelope"></i> <span
+                                    id="profileEmail">Loading...</span></p>
+                            <p class="text-muted mb-1"><i class="bi bi-telephone"></i> <span
+                                    id="profilePhone">Loading...</span></p>
+                            <p class="text-muted"><i class="bi bi-door-open"></i> Room <span
+                                    id="profileRoom">Loading...</span></p>
+                            <span class="badge bg-success">Active Student</span>
+                        </div>
+                    </div>
+
+                    <!-- Edit Profile + Change Password -->
+                    <div class="col-md-8">
+
+                        <!-- Edit Profile -->
+                        <div class="card shadow mb-4">
+                            <h5 class="mb-3">✏️ Edit Profile</h5>
+                            <div class="mb-3">
+                                <label class="form-label">Name</label>
+                                <input type="text" class="form-control" id="editName">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" id="editEmail">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Phone</label>
+                                <input type="text" class="form-control" id="editPhone">
+                            </div>
+                            <button class="btn btn-primary w-100" onclick="updateProfile()">
+                                <i class="bi bi-save"></i> Save Changes
+                            </button>
+                            <div id="editMsg" class="mt-2 text-center"></div>
+                            <!-- ✅ Add this button -->
+                            <button class="btn btn-warning w-100 mt-2" data-bs-toggle="modal"
+                                data-bs-target="#changePasswordModal">
+                                <i class="bi bi-lock"></i> Change Password
+                            </button>
+                        </div>
+
+
+                        <!-- Change Password Modal -->
+                        <div class="modal fade" id="changePasswordModal">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">🔒 Change Password</h5>
+                                        <button class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label class="form-label">New Password</label>
+                                            <input type="password" class="form-control" id="newPassword">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Confirm Password</label>
+                                            <input type="password" class="form-control" id="confirmPassword">
+                                        </div>
+                                        <div id="passMsg" class="text-center"></div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button class="btn btn-warning" onclick="changePassword()">
+                                            <i class="bi bi-lock"></i> Update Password
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const student = JSON.parse(localStorage.getItem("student"));
+
+        if (!student) {
+            window.location.href = "/student/login";
+        }
+
+        // Fill profile details
+        const initials = student.name.split(" ").map(n => n[0]).join("").toUpperCase();
+        document.getElementById("avatarInitials").innerText = initials;
+        document.getElementById("profileName").innerText = student.name;
+        document.getElementById("profileEmail").innerText = student.email || "N/A";
+        document.getElementById("profilePhone").innerText = student.phone || "N/A";
+        document.getElementById("profileRoom").innerText = student.room_id || "Not Assigned";
+
+        // Pre-fill edit form
+        document.getElementById("editName").value = student.name;
+        document.getElementById("editEmail").value = student.email || "";
+        document.getElementById("editPhone").value = student.phone || "";
+
+        // Update Profile
+        function updateProfile() {
+            const name = document.getElementById("editName").value.trim();
+            const email = document.getElementById("editEmail").value.trim();
+            const phone = document.getElementById("editPhone").value.trim();
+
+            if (!name || !email || !phone) {
+                document.getElementById("editMsg").innerHTML = `<span class="text-danger">All fields are required!</span>`;
+                return;
+            }
+
+            fetch(`/students/update-profile/${student.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, email, phone })
+            })
+                .then(res => res.text())
+                .then(msg => {
+                    document.getElementById("editMsg").innerHTML = `<span class="text-success">${msg}</span>`;
+
+                    // Update localStorage
+                    student.name = name;
+                    student.email = email;
+                    student.phone = phone;
+                    localStorage.setItem("student", JSON.stringify(student));
+
+                    // Refresh displayed data
+                    document.getElementById("profileName").innerText = name;
+                    document.getElementById("profileEmail").innerText = email;
+                    document.getElementById("profilePhone").innerText = phone;
+                    document.getElementById("avatarInitials").innerText = name.split(" ").map(n => n[0]).join("").toUpperCase();
+                })
+                .catch(() => {
+                    document.getElementById("editMsg").innerHTML = `<span class="text-danger">Update failed!</span>`;
+                });
+        }
+
+        // Change Password
+        function changePassword() {
+            const newPassword = document.getElementById("newPassword").value.trim();
+            const confirmPassword = document.getElementById("confirmPassword").value.trim();
+
+            if (!newPassword || !confirmPassword) {
+                document.getElementById("passMsg").innerHTML = `<span class="text-danger">All fields are required!</span>`;
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                document.getElementById("passMsg").innerHTML = `<span class="text-danger">Passwords do not match!</span>`;
+                return;
+            }
+
+            fetch(`/students/change-password/${student.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ password: newPassword })
+            })
+                .then(res => res.text())
+                .then(msg => {
+                    document.getElementById("passMsg").innerHTML = `<span class="text-success">${msg}</span>`;
+                    document.getElementById("newPassword").value = "";
+                    document.getElementById("confirmPassword").value = "";
+
+                    // ✅ Close modal after 1 second
+                    setTimeout(() => {
+                        bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
+                        document.getElementById("passMsg").innerHTML = "";
+                    }, 1000);
+                })
+                .catch(() => {
+                    document.getElementById("passMsg").innerHTML = `<span class="text-danger">Failed to update password!</span>`;
+                });
+        }
+        function logout() {
+            localStorage.removeItem("student");
+            window.location.href = "/";
+        }
+    </script>
+
+</body>
+
+</html>

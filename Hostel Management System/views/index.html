@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hostel System</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: radial-gradient(circle at top, #1e293b, #020617);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .login-wrapper {
+            width: 100%;
+            max-width: 420px;
+        }
+
+        /* Logo */
+        .logo-circle {
+            width: 75px;
+            height: 75px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            box-shadow: 0 10px 25px rgba(37,99,235,0.4);
+        }
+
+        /* Glass Card */
+        .glass-card {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 18px;
+            padding: 1.5rem;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        }
+
+        /* Buttons */
+        .login-btn {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-radius: 14px;
+            padding: 1rem 1.2rem;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            margin-bottom: 12px;
+        }
+
+        .login-btn:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Hover effect */
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        }
+
+        /* Admin */
+        .btn-admin {
+            background: rgba(220, 38, 38, 0.15);
+            border: 1px solid rgba(220, 38, 38, 0.4);
+        }
+
+        .btn-admin:hover {
+            background: rgba(220, 38, 38, 0.3);
+        }
+
+        /* Student */
+        .btn-student {
+            background: rgba(37, 99, 235, 0.15);
+            border: 1px solid rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-student:hover {
+            background: rgba(37, 99, 235, 0.3);
+        }
+
+        /* Icons */
+        .btn-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 20px;
+        }
+
+        .icon-admin {
+            background: rgba(220,38,38,0.25);
+            color: #fca5a5;
+        }
+
+        .icon-student {
+            background: rgba(37,99,235,0.25);
+            color: #93c5fd;
+        }
+
+        /* Text */
+        .btn-title-admin {
+            color: #fca5a5;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .btn-title-student {
+            color: #93c5fd;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .btn-sub {
+            font-size: 12px;
+            margin: 0;
+            opacity: 0.7;
+        }
+
+        .btn-sub-admin {
+            color: #fca5a5;
+        }
+
+        .btn-sub-student {
+            color: #93c5fd;
+        }
+
+        /* Arrow */
+        .chevron {
+            margin-left: auto;
+            opacity: 0.6;
+            transition: 0.2s;
+        }
+
+        .login-btn:hover .chevron {
+            transform: translateX(5px);
+        }
+
+        /* Title */
+        h4 {
+            color: white;
+            font-weight: 600;
+        }
+
+        p.text-secondary {
+            color: #94a3b8 !important;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="login-wrapper">
+
+    <!-- Header -->
+    <div class="text-center mb-4">
+        <div class="logo-circle">
+            <i class="bi bi-building text-white" style="font-size: 32px;"></i>
+        </div>
+
+        <h4>Hostel Management</h4>
+        <p class="text-secondary">Select your login type</p>
+    </div>
+
+    <!-- Glass Card -->
+    <div class="glass-card">
+
+        <!-- Admin -->
+        <a href="/admin/login" class="login-btn btn-admin">
+            <div class="btn-icon icon-admin">
+                <i class="bi bi-person-workspace"></i>
+            </div>
+
+            <div>
+                <p class="btn-title-admin">Admin Login</p>
+                <p class="btn-sub btn-sub-admin">Manage students, rooms & fees</p>
+            </div>
+
+            <i class="bi bi-chevron-right chevron"></i>
+        </a>
+
+        <!-- Student -->
+        <a href="/student/login" class="login-btn btn-student">
+            <div class="btn-icon icon-student">
+                <i class="bi bi-mortarboard"></i>
+            </div>
+
+            <div>
+                <p class="btn-title-student">Student Login</p>
+                <p class="btn-sub btn-sub-student">View room, fees & profile</p>
+            </div>
+
+            <i class="bi bi-chevron-right chevron"></i>
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>
